@@ -54,12 +54,49 @@ app.post("/products", async (request, response) => {
     // Sobreescribo la base de datos con los cambios
     await fs.writeFile(__dirname + "/db/db.txt", JSON.stringify(products), "utf-8")
 
-    response.json({statusText: "Producto agregado al carrito.", status: 201})
+    response.json({message: "Producto agregado al carrito."}).status(201)
 })
 
 // U
+app.put("/products/:id", async (request, response) => {
+  // En request.body se encuentra el objecto modificado
+  const productoAActualizar = request.body
+
+  // Leo la DB (consulta)
+  const data = await fs.readFile(__dirname + "/db/db.txt", "utf-8");
+
+  // Transformar la data a JS
+  const products = JSON.parse(data);
+
+  // Eliminamos el objeto original
+  const nuevaDB = products.filter(product => product.id !== productoAActualizar.id)
+
+  // Insertamos el actualizado
+  nuevaDB.push(productoAActualizar)
+
+  // Sobreescribo la base de datos con los cambios
+  await fs.writeFile(__dirname + "/db/db.txt", JSON.stringify(nuevaDB), "utf-8")
+
+  response.status(200).json({message: "Producto editado correctamente."})
+})
 
 // D
+app.delete("/products/:id", async (request, response) => {
+  const { id } = request.params
+
+  // Leo la DB (consulta)
+  const data = await fs.readFile(__dirname + "/db/db.txt", "utf-8");
+
+  // Transformar la data a JS
+  const products = JSON.parse(data);
+
+  const nuevaDB = products.filter(product => product.id !== id)
+
+   // Sobreescribo la base de datos con los cambios
+   await fs.writeFile(__dirname + "/db/db.txt", JSON.stringify(nuevaDB), "utf-8")
+
+   response.status(200).json({message: "Producto eliminado del carrito."})
+})
 
 app.listen(PORT, () => {
   console.log("Servidor funcionando");
@@ -80,3 +117,4 @@ app.listen(PORT, () => {
 //         name: "Termo Stanley"
 //     }
 // }
+
